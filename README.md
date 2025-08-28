@@ -66,7 +66,7 @@ Cappy/
 
 - **Frontend**: Streamlit (Python web framework)
 - **AI Backend**: Google Gemini AI via `google-generativeai`
-- **Search**: TF-IDF vectorization with scikit-learn for context retrieval
+- **Search**: Simple text matching for context retrieval (no scikit-learn dependency)
 - **Styling**: Custom CSS for ChatGPT-like appearance
 - **State Management**: Streamlit session state for conversation memory
 
