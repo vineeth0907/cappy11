@@ -1,6 +1,4 @@
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import re
 
 def load_company_data(file_path="data/capserve_info.txt"):
@@ -11,55 +9,35 @@ def load_company_data(file_path="data/capserve_info.txt"):
     except FileNotFoundError:
         return "CapServ Digital Lending is a cutting-edge digital platform aimed at modernizing financial services through a comprehensive lending marketplace."
 
-def chunk_text(text, chunk_size=500, overlap=100):
-    """Split text into overlapping chunks for better context retrieval."""
-    words = text.split()
-    chunks = []
+def find_relevant_context_simple(user_query, company_data, top_k=3):
+    """Find relevant context using simple text matching instead of TF-IDF."""
+    # Clean the query
+    query_words = set(re.sub(r'[^\w\s]', '', user_query.lower()).split())
     
-    for i in range(0, len(words), chunk_size - overlap):
-        chunk = ' '.join(words[i:i + chunk_size])
-        if chunk.strip():
-            chunks.append(chunk.strip())
+    # Split company data into sentences
+    sentences = re.split(r'[.!?]+', company_data)
     
-    return chunks
-
-def find_relevant_context(user_query, company_data, top_k=3):
-    """Find the most relevant context from company data using TF-IDF and cosine similarity."""
-    # Clean and prepare the query
-    query_clean = re.sub(r'[^\w\s]', '', user_query.lower())
+    # Score sentences based on word overlap
+    sentence_scores = []
+    for sentence in sentences:
+        sentence_words = set(re.sub(r'[^\w\s]', '', sentence.lower()).split())
+        if sentence_words:
+            overlap = len(query_words.intersection(sentence_words))
+            score = overlap / len(sentence_words) if sentence_words else 0
+            sentence_scores.append((score, sentence.strip()))
     
-    # Split company data into chunks
-    chunks = chunk_text(company_data)
+    # Sort by score and return top sentences
+    sentence_scores.sort(reverse=True)
+    relevant_sentences = [sentence for score, sentence in sentence_scores[:top_k] if score > 0]
     
-    if not chunks:
-        return company_data
-    
-    # Create TF-IDF vectors
-    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
-    try:
-        tfidf_matrix = vectorizer.fit_transform(chunks + [query_clean])
-        
-        # Calculate similarity between query and each chunk
-        query_vector = tfidf_matrix[-1]
-        chunk_vectors = tfidf_matrix[:-1]
-        
-        similarities = cosine_similarity(query_vector, chunk_vectors).flatten()
-        
-        # Get top-k most similar chunks
-        top_indices = similarities.argsort()[-top_k:][::-1]
-        relevant_chunks = [chunks[i] for i in top_indices if similarities[i] > 0.1]
-        
-        if relevant_chunks:
-            return " ".join(relevant_chunks)
-        else:
-            return company_data[:1000]  # Return first 1000 chars if no good match
-    except:
-        # Fallback if vectorization fails
-        return company_data[:1000]
+    if relevant_sentences:
+        return " ".join(relevant_sentences)
+    else:
+        return company_data[:1000]  # Return first 1000 chars if no good match
 
 def create_contextual_prompt(user_query, company_data):
     """Create a contextual prompt for Gemini with relevant company information."""
-    relevant_context = find_relevant_context(user_query, company_data)
+    relevant_context = find_relevant_context_simple(user_query, company_data)
     
     prompt = f"""You are Cappy, the AI assistant for CapServ Digital Lending, a cutting-edge digital lending platform. 
     
