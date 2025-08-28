@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🤖 Cappy - CapServ Digital Lending AI Assistant
 
 A full-stack chatbot web application built with Streamlit and Google's Gemini AI, designed to serve as CapServ Digital Lending's intelligent digital lending assistant.
@@ -66,7 +67,7 @@ Cappy/
 
 - **Frontend**: Streamlit (Python web framework)
 - **AI Backend**: Google Gemini AI via `google-generativeai`
-- **Search**: Simple text matching for context retrieval (no scikit-learn dependency)
+- **Search**: TF-IDF vectorization with scikit-learn for context retrieval
 - **Styling**: Custom CSS for ChatGPT-like appearance
 - **State Management**: Streamlit session state for conversation memory
 
@@ -118,3 +119,6 @@ This project is for demonstration purposes. Please ensure compliance with Google
 ---
 
 **Built with ❤️ for CapServ Digital Lending**
+=======
+# cappy11
+>>>>>>> 610757cc4b3a8bd1e094347365bd18064ace4e8f
